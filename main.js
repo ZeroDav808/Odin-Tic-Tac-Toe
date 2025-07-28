@@ -15,24 +15,38 @@ const gameBoard = () => {
         }
     }
 
-    const showBoard = () => {
-        for(let i = 0; i < board.length; i++){
-            for(let j = 0; j <board[0].length; j++){
-                let obj = board[i][j];
-                console.log(obj.getValue());
-            }
-        }
-    }
-
     const getBoard = () => board;
 
     const getIndex = (row, col) => { board[row][col]};
 
-    const clearBoard = () => {
-        setBoard();
+    function checkCell(row, col){
+        if(Math.min(row, col) < 0 || row >= ROW || col >= COL){
+            console.log('Your indicies are out of bounds!!!');
+            return false;
+        }
+        
+        console.log(`Checking if cell [${row}][${col}] is empyt ....`);
+        if(board[row][col].getName() === 'empty'){
+            console.log(`[${row}][${col}] is empty!`)
+            return true;
+        } else{
+            console.log(`[${row}][${col}] is not empty!`)
+            return false;
+        }
     }
 
-    return {showBoard ,getIndex, clearBoard, getBoard};
+
+    const clearBoard = () => {
+        for(let i = 0; i < ROW; i++){
+            board[i] = [];
+            for(let j = 0; j < COL; j++){
+                const obj = player('empty', 'x');
+                board[i][j] = obj;
+            }
+        }
+    }
+
+    return {getIndex, clearBoard, getBoard, checkCell};
 }
 
 const player = (name = '', value = '') => {
@@ -46,6 +60,27 @@ const player = (name = '', value = '') => {
 }
 
 const gameController = (player1 = "Player One", player2 = "Player Two") => {
+    const players = [
+        player(player1, 'X'), player(player2, 'O'),
+    ];
 
+    let currentPlayer = players[0];
+
+    const getPlayer = () => currentPlayer;
+
+    const switchPlayer = () => {
+        currentPlayer = (currentPlayer === players[0]) ? players[1] : players[0];
+    }
+
+    const playRound = (currentPlayer) => {
+        console.log(`Hello ${currentPlayer.getName()}, please make your selection`);
+    }
+
+    return {getPlayer, switchPlayer, playRound};
 }
+
+const board = gameBoard();
+const controller = gameController();
+
+
 
