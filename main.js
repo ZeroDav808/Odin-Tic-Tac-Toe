@@ -166,13 +166,15 @@ const gameController = (player1 = "Player One", player2 = "Player Two") => {
             antiDiag.push(board.getBoard()[i][board.getBoard().length - 1 - i]);
         }
 
+        
         const arraysAreEqual = (arr1, arr2) => {
             if(arr1.length !== arr2.length){
                 return false;
             }
 
             for(let i = 0; i < arr1.length; i++){
-                if(arr1[i] !== arr2[i]){
+                // Compare the 'value' of the player object with the string in arr2
+                if(arr1[i].getValue() !== arr2[i]){
                     return false;
                 }
             }
@@ -180,14 +182,20 @@ const gameController = (player1 = "Player One", player2 = "Player Two") => {
             return true;
         }
 
-        if(arraysAreEqual(x, mainDiag) || arraysAreEqual(x, antiDiag)){
+        // Check for 'X' win on diagonals
+        if(arraysAreEqual(mainDiag, x) || arraysAreEqual(antiDiag, x)){
             winner.player = players[0];
             winner.hasWon = true;
-        } else if(arraysAreEqual(o, mainDiag) || arraysAreEqual(o,antiDiag)){
+            return true; // Return true if 'X' wins
+        } 
+        // Check for 'O' win on diagonals
+        else if(arraysAreEqual(mainDiag, o) || arraysAreEqual(antiDiag, o)){ 
             winner.player = players[1];
             winner.hasWon = true;
+            return true; // Return true if 'O' wins
         }
-
+        
+        return false; // No diagonal win
     }
 
     const resetWinner = () => {
@@ -196,6 +204,7 @@ const gameController = (player1 = "Player One", player2 = "Player Two") => {
     }
 
     const checkWinner = () => {
+        
         if(checkDiagonal() || checkHorizontal() || checkVertical()){
             console.log(`${winner.player.getName()} has Won!!`);
             console.log('The game will now be restarted!');
@@ -247,5 +256,3 @@ const player1 = 'Max';
 const player2 = 'Jake';
 
 const game = gameController(player1, player2);
-
-
