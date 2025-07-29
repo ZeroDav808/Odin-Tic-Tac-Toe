@@ -9,7 +9,7 @@ const gameBoard = () => {
     for(let i = 0; i < ROW; i++){
         board[i] = [];
         for(let j = 0; j < COL; j++){
-            const obj = player('empty', '*');
+            const obj = player('empty', '');
             board[i][j] = obj;
         }
     }
@@ -62,7 +62,7 @@ const gameBoard = () => {
         for(let i = 0; i < ROW; i++){
             board[i] = [];
             for(let j = 0; j < COL; j++){
-                const obj = player('empty', '*');
+                const obj = player('empty', '');
                 board[i][j] = obj;
             }
         }
@@ -198,6 +198,27 @@ const gameController = (player1 = "Player One", player2 = "Player Two") => {
         return false; // No diagonal win
     }
 
+    const checkTie = () => {
+        let length = board.getBoard().length;
+        let currentBoard = board.getBoard();
+        let empty = false;
+        for(let i = 0; i < length; i++){
+            for(let j = 0; j < length; j++){
+                if(currentBoard[i][j].getName() === 'empty'){
+                    empty = true;
+                    break;
+                }
+            }
+        }
+
+        if(empty){
+            return;
+        } else{
+            console.log(`It's a tie!`);
+            board.clearBoard();
+        }
+    }
+
     const resetWinner = () => {
         winner.player = player();
         winner.hasWon = false;
@@ -213,46 +234,81 @@ const gameController = (player1 = "Player One", player2 = "Player Two") => {
         }
     }
 
-    const playRound = (currentPlayer) => {
-        console.log(`Hello ${currentPlayer.getName()}, please make your selection`);
-        let row = '';
-        let col = '';
-
-        while(true){
-            row = prompt('Enter a number for row [0 - 2]: ');
-            col = prompt('Enter a number for col [0 - 2]: ');
-            let empty = board.checkCell(row, col);
-            if(empty){
-                break;
-            } 
+    const playRound = (row, col) => {
+        console.log(`${getPlayer().getName()} is making their selection`);
+        
+        let empty = board.checkCell(row, col);
+        if(!empty){
             console.log(`Index [${row}][${col}] is not empty! Please try again`);
-        }
-
+            return;
+        } 
         
         // const selection = board.getIndex(row, col);
-        console.log(`${currentPlayer.getName()} is selecting board cell [${row}][${col}]`);
+        console.log(`${currentPlayer.getName()} selected board cell [${row}][${col}]`);
         board.updateCell(row, col, currentPlayer);
+        checkTie();
+        checkWinner();
         console.log(board.getBoard()[row][col].getName() + ' ' + board.getBoard()[row][col].getValue());
         board.showBoard();
-
+        switchPlayer();
     }
 
-    const playGame = () => {
-        const NUM_OF_ROUNDS = 9;
+    // const playGame = () => {
+    //     const NUM_OF_ROUNDS = 9;
 
-        for(let round = 0; round < NUM_OF_ROUNDS; round++){
-            playRound(currentPlayer);
-            switchPlayer();
-            if(round >= 2){
-                checkWinner();
-            }
-        }
-    }
+    //     for(let round = 0; round < NUM_OF_ROUNDS; round++){
+    //         playRound(currentPlayer);
+    //         switchPlayer();
+    //         if(round >= 2){
+    //             checkWinner();
+    //         }
+    //     }
+    // }
 
-    return {getPlayer, switchPlayer, playRound, playGame};
+    return {getPlayer, switchPlayer, playRound, getBoard: board.getBoard, };
 }
 
-const player1 = 'Max';
-const player2 = 'Jake';
+const displayController = () => {
+    const scoreBoard = document.querySelector('#score-board');
+    const gameContainer = document.querySelector('#game-board');
+    const game = gameController();
+    
 
-const game = gameController(player1, player2);
+
+    const updateScreen = () => {
+        scoreBoard.textContent = "";
+        gameContainer.textContent = "";
+        const board = game.getBoard();
+        const currentPlayer = game.getPlayer();
+        
+
+        scoreBoard.textContent = `${currentPlayer.getName()}'s turn ...`;
+
+        board.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                const square = document.createElement('div');
+                square.classList.add("square");
+
+                square.dataset.column = colIndex;
+                square.dataset.row = rowIndex;
+                square.textContent = cell.getValue();
+                gameContainer.appendChild(square);
+            })
+        })
+    }
+
+    function clickHandler(e) {
+        const col = e.target.dataset.column;
+        const row = e.target.dataset.row;
+        if(!col && !row) return;
+
+        game.playRound(row, col);
+        updateScreen();
+    }
+    updateScreen();
+    gameContainer.addEventListener('click', clickHandler);
+    
+}
+
+displayController();
+
